@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OrderLah</title>
+<link rel="stylesheet" href="/app.css">
+<style>
+  .wrap { max-width: 980px; margin: 0 auto; padding: 40px 16px 56px; }
+  .hero h1 { font-size: clamp(26px, 4vw, 38px); line-height: 1.15; margin: 18px 0 10px; letter-spacing: -0.01em; }
+  .hero p { font-size: 16px; color: var(--muted); max-width: 680px; margin: 0; }
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 28px; }
+  .tile { padding: 18px; text-decoration: none; color: inherit; display: grid; gap: 6px; }
+  .tile:hover { border-color: var(--accent); }
+  .tile b { font-size: 15px; }
+  .tile.main { border-color: var(--accent); background: var(--accent-soft); }
+  .tile p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  h2 { font-size: 16px; margin: 34px 0 10px; }
+  .three { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .three .card { padding: 16px; }
+  .three b { display: block; margin-bottom: 4px; }
+  .three p { margin: 0; color: var(--muted); font-size: 13.5px; }
+  ol { padding-left: 20px; margin: 0; display: grid; gap: 6px; }
+  .foot { margin-top: 36px; font-size: 12.5px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><div class="logo">OL</div>OrderLah <small>· for the Orbyte ecosystem</small></div>
+  <div class="hero">
+    <h1>Stop losing sales in your WhatsApp inbox.</h1>
+    <p>OrderLah tags every chat, tells a small seller who to answer first, turns orders into checked invoices, and drafts follow-ups for quiet customers — the owner approves every message.</p>
+    <div class="pills"><span class="badge ok">Micro &amp; small sellers</span><span class="badge info">WhatsApp first</span><span class="badge">AI on RunPod</span><span class="badge warn">Human approves</span></div>
+  </div>
+
+  <div class="tiles">
+    <a class="card tile main" href="/inbox.html"><b>Orbyte inbox →</b><p>Who to answer first, AI tags, suggested replies, follow-ups waiting for approval, and the sales they won back.</p></a>
+    <a class="card tile" href="/simulator.html"><b>WhatsApp simulator →</b><p>Customer, owner, supervisor and staff phones side by side. No WhatsApp account needed.</p></a>
+    <a class="card tile" href="/dashboard.html"><b>Orders →</b><p>Orders, rule checks, approvals, invoices, payments and the full audit trail.</p></a>
+  </div>
+
+  <h2>One problem, three symptoms</h2>
+  <div class="three">
+    <div class="card"><b>Reply order is a mess</b><p>WhatsApp sorts by the latest message, so patient customers sink below people who spam. OrderLah queues by the first unanswered message.</p></div>
+    <div class="card"><b>Orders get written down wrong</b><p>Manual copying leads to wrong cakes and refunds. OrderLah reads the order, the customer confirms the summary, the owner approves.</p></div>
+    <div class="card"><b>Nobody follows up</b><p>Quiet customers are often comparing prices. OrderLah drafts a follow-up inside WhatsApp's 24-hour window — max 2, only when the owner taps send.</p></div>
+  </div>
+
+  <h2>3-minute demo</h2>
+  <div class="card" style="padding:16px">
+    <ol>
+      <li>Open the <a href="/simulator.html">simulator</a> and the <a href="/inbox.html">inbox</a> side by side, press <b>Reset demo</b>.</li>
+      <li>Press <b>▶ Inbox scenario</b>: three customers write, Ali spams five times — the queue still puts Aina's urgent order first and Ali last.</li>
+      <li>Approve Aina's order (inbox or the owner's phone) → invoice, payment link and packing list go out.</li>
+      <li>Send Kevin the suggested reply, press <b>+3 hours</b> → a follow-up draft appears on the owner's phone → <b>Send</b>.</li>
+      <li>In the simulator, Kevin answers "I'll take one!" → confirms → owner approves → "Won back by follow-up" goes up.</li>
+    </ol>
+  </div>
+  <p class="foot">Hackathon prototype for the Orbyte Smart SME Challenge. All businesses, people and phone numbers are fictional.</p>
+</div>
+</body>
+</html>

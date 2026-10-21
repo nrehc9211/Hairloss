@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pay invoice · OrderLah</title>
+<link rel="stylesheet" href="/app.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  body { display: grid; place-items: start center; min-height: 100vh; padding: 24px 16px; }
+  .pay { width: min(420px, 100%); }
+  .sim { background: var(--warn-soft); color: var(--warn); font-weight: 600; font-size: 12.5px; padding: 8px 12px; border-radius: 10px; margin-bottom: 12px; text-align: center; }
+  .head { padding: 18px 18px 6px; }
+  .head .biz { font-weight: 700; }
+  .amount { font-size: 34px; font-weight: 800; margin: 8px 0 2px; font-variant-numeric: tabular-nums; }
+  .lines { padding: 6px 18px; }
+  .lines div { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .qr { display: grid; place-items: center; padding: 16px; }
+  .qr #qrcode { background: #fff; padding: 10px; border-radius: 10px; }
+  .actions { padding: 0 18px 18px; display: grid; gap: 8px; }
+  .done { text-align: center; padding: 28px 18px; }
+  .done .tick { font-size: 44px; }
+</style>
+</head>
+<body>
+<div class="pay">
+  <div class="sim">SIMULATION · no real money is moved (hackathon prototype)</div>
+  <div class="card" id="card"><div class="head muted">Loading invoice…</div></div>
+</div>
+<script>
+const id = location.pathname.split('/').pop();
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const rm = (n) => 'RM ' + Number(n).toFixed(2);
+async function load() {
+  const r = await fetch('/api/invoices/' + id);
+  if (!r.ok) { document.querySelector('#card').innerHTML = '<div class="head">Invoice not found.</div>'; return; }
+  const inv = await r.json();
+  if (inv.status === 'paid') return paid(inv);
+  document.querySelector('#card').innerHTML = `
+    <div class="head"><div class="biz">${esc(inv.business.name)}</div><div class="muted">Invoice ${inv.id} · for ${esc(inv.customer.name)}</div>
+      <div class="amount">${rm(inv.total)}</div><div class="muted">Due ${inv.dueDate}</div></div>
+    <div class="lines">${inv.lines.map((l) => `<div><span>${l.qty} × ${esc(l.name)}</span><span>${rm(l.amount)}</span></div>`).join('')}</div>
+    <div class="qr"><div id="qrcode"></div><div class="muted" style="font-size:12px;margin-top:6px">Scan with your banking app (simulated DuitNow QR)</div></div>
+    <div class="actions"><button class="btn primary" id="payBtn">Pay ${rm(inv.total)} with DuitNow (simulated)</button>
+    <a class="btn" style="text-align:center;text-decoration:none" href="${esc(inv.pdfUrl)}" target="_blank">View invoice PDF</a></div>`;
+  if (window.QRCode) new QRCode(document.getElementById('qrcode'), { text: location.href, width: 168, height: 168 });
+  else document.getElementById('qrcode').textContent = location.href;
+  document.querySelector('#payBtn').onclick = async (e) => {
+    e.target.disabled = true; e.target.textContent = 'Processing…';
+    const res = await fetch('/api/payments/webhook', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ invoiceId: inv.id, method: 'DuitNow QR (simulated)' }) });
+    if (res.ok) paid({ ...inv, paidAt: new Date().toISOString() });
+  };
+}
+function paid(inv) {
+  document.querySelector('#card').innerHTML = `<div class="done"><div class="tick">✅</div><h2 style="margin:6px 0">Payment received</h2>
+    <div class="muted">${rm(inv.total)} for ${inv.id}<br>A receipt has been sent to your WhatsApp.</div></div>`;
+}
+load();
+</script>
+</body>
+</html>

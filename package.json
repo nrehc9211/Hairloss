@@ -1,0 +1,18 @@
+{
+  "name": "orderlah",
+  "version": "0.1.0",
+  "private": true,
+  "description": "WhatsApp order -> approval -> invoice -> payment automation for Malaysian micro & small suppliers (Orbyte ecosystem prototype)",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test --test-concurrency=1",
+    "reset": "node scripts/reset.js",
+    "wa:check": "node scripts/wa-check.js"
+  },
+  "engines": { "node": ">=22" },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  }
+}
