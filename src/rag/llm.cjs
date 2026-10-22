@@ -1,25 +1,55 @@
 'use strict';
 // Calls Claude through the Messages API. Any function with the same shape
 // ({ system, user }) => Promise<string> can replace it, e.g. a RunPod model later.
+//
+// Credentials, checked in this order:
+//   1. Your own key:          ANTHROPIC_API_KEY (+ optional ANTHROPIC_BASE_URL)
+//   2. Replit AI Integrations: AI_INTEGRATIONS_ANTHROPIC_API_KEY + AI_INTEGRATIONS_ANTHROPIC_BASE_URL
+// Model: ANTHROPIC_MODEL. Replit-managed and direct Anthropic accounts use different
+// model names, so set it to a name from the provider you use.
+
+function anthropicConfig() {
+  const env = process.env;
+  if (env.ANTHROPIC_API_KEY) {
+    return {
+      provider: 'anthropic',
+      apiKey: env.ANTHROPIC_API_KEY,
+      baseUrl: env.ANTHROPIC_BASE_URL || 'https://api.anthropic.com',
+      model: env.ANTHROPIC_MODEL || 'claude-sonnet-5-5',
+    };
+  }
+  if (env.AI_INTEGRATIONS_ANTHROPIC_API_KEY && env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL) {
+    return {
+      provider: 'replit',
+      apiKey: env.AI_INTEGRATIONS_ANTHROPIC_API_KEY,
+      baseUrl: env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL,
+      model: env.ANTHROPIC_MODEL || 'claude-sonnet-5',
+    };
+  }
+  throw new Error(
+    'No Claude credentials found. Set ANTHROPIC_API_KEY, or enable Anthropic through Replit AI Integrations.',
+  );
+}
 
 async function claude({ system, user, maxTokens = 1024 }) {
-  if (!process.env.ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY is not set in .env');
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const config = anthropicConfig();
+  const url = `${config.baseUrl.replace(/\/+$/, '').replace(/\/v1$/, '')}/v1/messages`;
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': process.env.ANTHROPIC_API_KEY,
+      'x-api-key': config.apiKey,
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5',
+      model: config.model,
       max_tokens: maxTokens,
       temperature: 0,
       system,
       messages: [{ role: 'user', content: user }],
     }),
   });
-  if (!res.ok) throw new Error(`Claude API failed (${res.status}): ${await res.text()}`);
+  if (!res.ok) throw new Error(`Claude API failed via ${config.provider} (${res.status}): ${await res.text()}`);
   const json = await res.json();
   return json.content.filter((b) => b.type === 'text').map((b) => b.text).join('');
 }
@@ -67,4 +97,4 @@ function buildAnswerPrompt(question, chunks, customerName) {
     `<customer>${customerName || 'unknown'}</customer>\n<message>${question}</message>`;
 }
 
-module.exports = { claude, parseJson, ANSWER_SYSTEM_PROMPT, buildAnswerPrompt };
+module.exports = { claude, anthropicConfig, parseJson, ANSWER_SYSTEM_PROMPT, buildAnswerPrompt };
