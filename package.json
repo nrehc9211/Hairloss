@@ -1,24 +1,17 @@
 {
-  "name": "orderlah",
-  "version": "0.1.0",
-  "private": true,
-  "description": "WhatsApp order -> approval -> invoice -> payment automation for Malaysian micro & small suppliers (Orbyte ecosystem prototype)",
+  "name": "orbyte-smartdesk",
+  "version": "1.0.0",
+  "description": "Orbyte SmartDesk - WhatsApp order desk, AI replies, invoice approvals and payment tracking for SMEs",
   "type": "module",
+  "main": "server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "node --watch src/server.js",
-    "test": "node --test --test-concurrency=1",
-    "reset": "node scripts/reset.js",
-    "wa:check": "node scripts/wa-check.js",
-    "rag:build": "node scripts/rag-build.cjs",
-    "rag:ask": "node scripts/rag-ask.cjs",
-    "rag:report": "node scripts/rag-report.cjs",
-    "rag:retest": "node scripts/rag-retest.cjs"
+    "start": "node server.js",
+    "reset": "node server.js --reset"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22.5"
   },
-  "dependencies": {
-    "pdf-lib": "^1.17.1"
+  "optionalDependencies": {
+    "@anthropic-ai/sdk": "latest"
   }
 }
