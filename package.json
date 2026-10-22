@@ -6,12 +6,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "reset": "node server.js --reset"
+    "reset": "node server.js --reset",
+    "test": "node --test"
   },
   "engines": {
     "node": ">=22.5"
-  },
-  "optionalDependencies": {
-    "@anthropic-ai/sdk": "latest"
   }
 }

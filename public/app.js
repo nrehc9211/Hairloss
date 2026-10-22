@@ -122,6 +122,7 @@ pages.dashboard = {
             <div><span>WhatsApp Business</span><span class="badge ${d.integrations.whatsapp === 'live' ? 'ok' : 'warn'}">${d.integrations.whatsapp}</span></div>
             <div><span>Orbyte invoices</span><span class="badge ${d.integrations.orbyte === 'live' ? 'ok' : 'warn'}">${d.integrations.orbyte}</span></div>
             <div><span>AI engine</span><span class="small">${esc(d.integrations.ai)}</span></div>
+            <div><span>FAQ drafts (RAG)</span><span class="badge ${d.integrations.faqDrafts === 'on' ? 'ok' : 'warn'}">${d.integrations.faqDrafts}</span></div>
           </div>
           <div class="card">
             <h2>Sustainable Development Goals</h2>
@@ -137,13 +138,53 @@ pages.dashboard = {
   },
 };
 
+const langLabel = code => { try { return new Intl.DisplayNames(['en'], { type: 'language' }).of(code) || code; } catch { return code; } };
+
+// ------------------------------------------------------------------ FAQ drafts (RAG)
+const FLAG_LABELS = {
+  NOT_IN_DOCUMENTS: 'Not in your FAQ',
+  PRICE_NOT_IN_SOURCE: 'Price not in your price list',
+  CITED_UNKNOWN_SOURCE: 'Answer not backed by FAQ',
+  ANSWER_WITHOUT_SOURCE: 'Answer not backed by FAQ',
+};
+const flagLabel = f => FLAG_LABELS[f.split(':')[0]] || f;
+const sourceLabel = id => {
+  const key = id.split('#')[1] || id;
+  if (key.startsWith('faq-')) return 'FAQ #' + key.slice(4);
+  if (key === 'business') return 'Shop settings';
+  return key;
+};
+function draftBox(e, questionEn) {
+  const flags = JSON.parse(e.draft_flags || '[]');
+  const sources = JSON.parse(e.draft_sources || '[]');
+  const q = `<div class="small muted">Question: “${esc(e.question)}”${questionEn ? ` <span class="translation">(EN: ${esc(questionEn)})</span>` : ''}</div>`;
+  if (e.draft_status === 'pending') return `<div class="draft">${q}<div class="muted">✨ Preparing an answer from your FAQ…</div></div>`;
+  if (e.draft_status === 'failed') return `<div class="draft warn">${q}<div class="row"><span>AI draft failed: ${esc(e.draft_reason || 'unknown error')}</span><div class="spacer"></div><button class="btn sm" data-redraft="${e.id}">Try again</button></div></div>`;
+  if (e.draft_status !== 'ready' && e.draft_status !== 'needs_review') return '';
+  const notInFaq = flags.some(f => f.startsWith('NOT_IN_DOCUMENTS'));
+  return `<div class="draft ${e.draft_status === 'ready' ? '' : 'warn'}">
+    <div class="row" style="gap:6px"><span class="tag ai">AI draft from FAQ</span>
+      ${e.draft_status === 'ready' ? '<span class="badge ok">Passed all checks</span>' : '<span class="badge warn">Check before sending</span>'}
+      ${[...new Set(flags.map(flagLabel))].map(f => `<span class="badge bad">${esc(f)}</span>`).join('')}</div>
+    ${q}
+    ${notInFaq
+      ? `<div class="draft-text muted">Your FAQ doesn't answer this${e.draft_missing ? `. Consider adding: <b>${esc(e.draft_missing)}</b>` : '.'}</div>`
+      : `<div class="draft-text">${esc(e.draft_reply)}${e.draft_reply_en ? `<div class="translation">EN: ${esc(e.draft_reply_en)}</div>` : ''}</div>`}
+    ${e.draft_reason ? `<div class="small muted">Note: ${esc(e.draft_reason)}</div>` : ''}
+    <div class="row" style="margin-top:8px">
+      <span class="small muted">${sources.length ? 'Based on: ' + sources.map(sourceLabel).map(esc).join(', ') : ''}</span><div class="spacer"></div>
+      <button class="btn sm" data-redraft="${e.id}">Draft again</button>
+      ${notInFaq ? '' : `<button class="btn sm" data-edit-draft="${e.id}">Edit first</button><button class="btn sm ok" data-send-draft="${e.id}">Send draft</button>`}
+    </div></div>`;
+}
+
 // ------------------------------------------------------------------ inbox
-const inbox = { tab: 'open', customerId: null, lastCount: -1 };
+const inbox = { tab: 'open', customerId: null, lastCount: -1, escalations: [], draftId: null };
 pages.inbox = {
   async render(id) {
     if (id) inbox.customerId = Number(id);
     view.innerHTML = `
-      <h1>Inbox</h1><p class="sub">The AI answers routine questions. Questions it can't answer wait here, oldest first. Replies you send go straight to the customer's WhatsApp.</p>
+      <h1>Inbox</h1><p class="sub">The AI answers routine questions. Questions it can't answer wait here, oldest first, with an AI draft from your FAQ when possible. Nothing is sent until you approve it.</p>
       <div class="inbox">
         <div class="card qlist">
           <div class="qlist-head chips" style="margin:0">
@@ -171,7 +212,7 @@ pages.inbox = {
       const items = await api('/api/escalations?status=' + inbox.tab);
       setHTML(list, items.length ? items.map(e => `
         <div class="qitem ${e.customer_id === inbox.customerId ? 'active' : ''}" data-cid="${e.customer_id}">
-          <div class="who">${esc(e.name || '+' + e.phone)}<time title="${fmtTime(e.created_at)}">${ago(e.created_at)}</time></div>
+          <div class="who">${esc(e.name || '+' + e.phone)}${e.draft_status === 'ready' ? ' <span class="badge ok">Draft ready</span>' : e.draft_status === 'needs_review' ? ' <span class="badge warn">Draft: check</span>' : ''}<time title="${fmtTime(e.created_at)}">${ago(e.created_at)}</time></div>
           <div class="q">${esc(e.question)}</div>
           <div class="small muted" style="margin-top:4px">${esc(e.reason)}</div></div>`).join('')
         : `<div class="empty">${inbox.tab === 'open' ? '🎉 All caught up. No unanswered questions.' : 'Nothing here yet'}</div>`);
@@ -189,7 +230,7 @@ pages.inbox = {
       chat.innerHTML = `
         <div class="chat-head">
           <div class="avatar">${esc((c.name || '?')[0].toUpperCase())}</div>
-          <div><div style="font-weight:600">${esc(c.name || 'Unknown customer')}</div><div class="small muted">+${esc(c.phone)} · ${esc(c.address || 'no address yet')}</div></div>
+          <div><div style="font-weight:600">${esc(c.name || 'Unknown customer')}</div><div class="small muted">+${esc(c.phone)} · ${esc(c.address || 'no address yet')}${c.lang ? ` · writes in ${esc(langLabel(c.lang))}` : ''}</div></div>
           <div class="spacer"></div>
           <span id="chat-orders"></span>
           <button class="btn sm" id="edit-cust">Edit details</button>
@@ -206,7 +247,9 @@ pages.inbox = {
         if (!text) return;
         $('#send').disabled = true;
         try {
-          await api(`/api/customers/${c.id}/reply`, { method: 'POST', body: { text, resolve: $('#resolve').checked } });
+          if (inbox.draftId) await api(`/api/escalations/${inbox.draftId}/send-draft`, { method: 'POST', body: { text } });
+          else await api(`/api/customers/${c.id}/reply`, { method: 'POST', body: { text, resolve: $('#resolve').checked } });
+          inbox.draftId = null;
           $('#reply').value = '';
           toast('Sent to WhatsApp');
           inbox.lastCount = -1;
@@ -216,16 +259,39 @@ pages.inbox = {
       };
       $('#reply').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#send').click(); } };
       $('#edit-cust').onclick = () => editCustomer(c, () => { chat.dataset.cid = ''; this.loadChat(); });
+      inbox.draftId = null;
+      $('#esc-banner').onclick = async ev => {
+        const b = ev.target.closest('button');
+        if (!b) return;
+        const id = Number(b.dataset.sendDraft || b.dataset.editDraft || b.dataset.redraft);
+        if (b.dataset.editDraft) {
+          const e = inbox.escalations.find(x => x.id === id);
+          $('#reply').value = e?.draft_reply || '';
+          inbox.draftId = id;
+          $('#reply').focus();
+          return toast('Draft copied to the reply box. Edit it, then press Send.');
+        }
+        b.disabled = true;
+        try {
+          if (b.dataset.sendDraft) { await api(`/api/escalations/${id}/send-draft`, { method: 'POST' }); toast('Draft sent to WhatsApp'); }
+          else { await api(`/api/escalations/${id}/redraft`, { method: 'POST' }); toast('Preparing a new draft…'); }
+          inbox.lastCount = -1;
+          await this.refresh();
+        } catch (e) { toast(e.message, true); b.disabled = false; }
+      };
       inbox.lastCount = -1;
     }
     $('#chat-orders').innerHTML = c.orders.slice(0, 3).map(o => `<a class="badge" href="#/orders/${o.id}">${o.code}</a>`).join(' ');
-    $('#esc-banner').innerHTML = c.escalations.length ? `<div class="esc-banner">⚠ ${c.escalations.length} unanswered question(s) - highlighted below.</div>` : '';
+    inbox.escalations = c.escalations;
+    setHTML($('#esc-banner'), c.escalations.length
+      ? `<div class="esc-banner">⚠ ${c.escalations.length} unanswered question(s) - highlighted below.</div>${c.escalations.map(e => draftBox(e, c.messages.find(m => m.id === e.message_id)?.translation_en)).join('')}`
+      : '');
     const key = c.messages.length + ':' + c.escalations.length;
     if (key === inbox.lastCount) return;
     inbox.lastCount = key;
     const body = $('#chat-body');
     body.innerHTML = c.messages.map(m => `
-      <div class="bubble ${m.direction} ${flagged.has(m.id) ? 'flag' : ''}">${senderTag(m)}${esc(m.body)}
+      <div class="bubble ${m.direction} ${flagged.has(m.id) ? 'flag' : ''}">${senderTag(m)}${esc(m.body)}${m.translation_en ? `<div class="translation">EN: ${esc(m.translation_en)}</div>` : ''}
         <div class="meta">${m.direction === 'in' && m.intent ? `<span class="tag intent">${esc(m.intent)}</span>` : ''}${fmtTime(m.created_at)}${m.direction === 'out' ? (m.delivery === 'sent' ? ' ✓✓' : m.delivery === 'failed' ? ' ⚠ failed' : ' ✓') : ''}</div></div>`).join('');
     body.scrollTop = body.scrollHeight;
   },
@@ -442,6 +508,9 @@ pages.settings = {
           ${field('discount_min_qty', 'Discount from (boxes)', 'number')}${field('discount_pct', 'Discount (%)', 'number')}
           ${field('payment_terms_days', 'Payment due after (days)', 'number')}${field('max_qty_per_order', 'Flag orders above (boxes)', 'number')}
           ${field('followup_hours', 'Follow up quiet customers after (hours)', 'number')}${field('payment_reminder_hours', 'Payment reminder every (hours)', 'number')}
+          <div><label>FAQ answers from the AI</label><select data-k="rag_auto_send">
+            <option value="0" ${s.rag_auto_send !== '1' ? 'selected' : ''}>I approve every draft (recommended)</option>
+            <option value="1" ${s.rag_auto_send === '1' ? 'selected' : ''}>Auto-send drafts that pass all checks</option></select></div>
         </div>
         <div class="row" style="margin-top:14px"><button class="btn primary" id="save-settings">Save settings</button></div>
       </div>
@@ -451,6 +520,11 @@ pages.settings = {
           <td><input data-f="price" type="number" step="0.01" value="${p.price}" style="width:90px"></td><td><input data-f="stock" type="number" value="${p.stock}" style="width:80px"></td>
           <td><input data-f="active" type="checkbox" ${p.active ? 'checked' : ''} style="width:auto"></td><td><button class="btn sm" data-save>Save</button></td></tr>`).join('')}
         </tbody></table></div>
+      <div class="card" style="margin-bottom:16px"><h2>FAQ knowledge base</h2>
+        <p class="small muted">For questions the routine replies can't handle, the AI drafts an answer using only your FAQ (<span class="mono">knowledge/faq.json</span> and any .md/.txt files in that folder) plus the prices and delivery details above. Edit the files and the AI picks up the changes automatically.</p>
+        <div id="rag-status" class="small muted">Loading…</div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="rag-report">Open question report</button><button class="btn" id="rag-report-ai">Report with AI grouping</button><button class="btn" id="rag-retest">Re-test unanswered questions</button></div>
+      </div>
       <div class="card"><h2>Demo tools</h2>
         <p class="small muted">For presentations: pretend 2 days have passed, then run the automations to see follow-ups and payment reminders.</p>
         <div class="row"><button class="btn" id="tt">⏩ Skip ahead 49 hours</button><button class="btn" id="run">Run follow-ups & reminders now</button></div>
@@ -465,6 +539,19 @@ pages.settings = {
       await api('/api/products/' + tr.dataset.pid, { method: 'PUT', body: { price: $('[data-f=price]', tr).value, stock: $('[data-f=stock]', tr).value, active: $('[data-f=active]', tr).checked } });
       toast('Product saved');
     });
+    api('/api/rag/status').then(r => setHTML($('#rag-status'),
+      `AI drafts: <b>${r.available ? 'on' : 'off (add GEMINI_API_KEY)'}</b> · Search: ${esc(r.search)} · ${r.chunks} entries from ${r.files.map(esc).join(', ')} · ${r.questions} question(s) drafted, ${r.unanswered} not in FAQ`))
+      .catch(e => setHTML($('#rag-status'), esc(e.message)));
+    $('#rag-report').onclick = () => window.open('/api/rag/report', '_blank');
+    $('#rag-report-ai').onclick = () => window.open('/api/rag/report?ai=1', '_blank');
+    $('#rag-retest').onclick = async () => {
+      $('#rag-retest').disabled = true;
+      try {
+        const r = await api('/api/rag/retest', { method: 'POST' });
+        toast(r.total ? `${r.nowAnswered} of ${r.total} previously unanswered question(s) are now answered by your FAQ` : 'No unanswered questions to re-test');
+      } catch (e) { toast(e.message, true); }
+      $('#rag-retest').disabled = false;
+    };
     $('#tt').onclick = async () => { await api('/api/demo/time-travel', { method: 'POST', body: { hours: 49 } }); toast('Moved 49 hours ahead'); };
     $('#run').onclick = async () => {
       const r = await api('/api/automations/run', { method: 'POST' });
@@ -478,7 +565,7 @@ const sim = { phone: localStorage.getItem('sim-phone') || '60123456789', name: l
 const SAMPLES = [
   'Hi', 'How much is the kek lapis?', 'How long does delivery take to Penang?', 'Got any discount?',
   'I want 2 original and 1 cheese', 'Name: Aisyah Rahman\nAddress: 12, Jalan Mawar 3, 40000 Shah Alam, Selangor',
-  'Can you write Happy Birthday on the box?', 'Is it halal certified?', 'Dah transfer', 'Where is my order?',
+  'Can you write Happy Birthday on the box?', 'Kek ni boleh simpan dalam peti sejuk?', 'கேக் லாபிஸ் விலை என்ன?', 'Is it halal certified?', 'Dah transfer', 'Where is my order?',
 ];
 pages.simulator = {
   async render() {

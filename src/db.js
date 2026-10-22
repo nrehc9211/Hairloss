@@ -7,14 +7,46 @@ import path from 'node:path';
 const DATA_DIR = path.resolve('data');
 const DB_FILE = path.join(DATA_DIR, 'smartdesk.db');
 
-export function openDb({ reset = false } = {}) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-  if (reset && fs.existsSync(DB_FILE)) fs.rmSync(DB_FILE);
-  const db = new DatabaseSync(DB_FILE);
+// file: path to the database, or ':memory:' for tests.
+export function openDb({ reset = false, file = DB_FILE } = {}) {
+  if (file !== ':memory:') {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    if (reset && fs.existsSync(file)) fs.rmSync(file);
+  }
+  const db = new DatabaseSync(file);
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
   createSchema(db);
+  migrate(db);
   seed(db);
   return db;
+}
+
+// Columns added after the first release. Existing databases get them on start-up.
+const ADDED_COLUMNS = {
+  customers: {
+    lang: 'TEXT',           // language code the customer last wrote in (en, ms, zh, ta, id, ...)
+  },
+  messages: {
+    translation_en: 'TEXT', // English meaning, for the owner, when the message is in another language
+  },
+  escalations: {
+    draft_status: 'TEXT',   // pending | ready | needs_review | unavailable | failed
+    draft_reply: 'TEXT',    // AI draft answer from the FAQ, for the owner to approve
+    draft_flags: 'TEXT',    // JSON list of safety flags
+    draft_sources: 'TEXT',  // JSON list of knowledge-base entries used
+    draft_reason: 'TEXT',   // note for the owner
+    draft_missing: 'TEXT',  // what the FAQ should contain to answer this
+    draft_reply_en: 'TEXT', // English meaning of a draft written in another language
+  },
+};
+
+function migrate(db) {
+  for (const [table, columns] of Object.entries(ADDED_COLUMNS)) {
+    const existing = new Set(db.prepare(`PRAGMA table_info(${table})`).all().map((c) => c.name));
+    for (const [name, type] of Object.entries(columns)) {
+      if (!existing.has(name)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${name} ${type}`);
+    }
+  }
 }
 
 export const now = () => new Date().toISOString();
@@ -133,6 +165,8 @@ const DEFAULT_SETTINGS = {
   business_name: 'Mak Teh Kek Lapis',
   owner_name: 'Owner',
   delivery_info: 'Delivery takes 2-3 working days within Klang Valley and 3-5 working days to other states. Sabah & Sarawak 5-7 working days.',
+  delivery_info_ms: 'Penghantaran mengambil masa 2-3 hari bekerja dalam Lembah Klang dan 3-5 hari bekerja ke negeri lain. Sabah & Sarawak 5-7 hari bekerja.',
+  delivery_info_zh: '巴生谷地区2-3个工作日送达，其他州属3-5个工作日，沙巴和砂拉越5-7个工作日。',
   delivery_fee: '10',
   free_delivery_min: '150',
   discount_min_qty: '3',
@@ -142,6 +176,7 @@ const DEFAULT_SETTINGS = {
   followup_hours: '48',
   payment_reminder_hours: '24',
   max_qty_per_order: '20',
+  rag_auto_send: '0',          // 1 = send confident FAQ answers without waiting for the owner
 };
 
 function seed(db) {
@@ -151,13 +186,32 @@ function seed(db) {
   const count = db.prepare('SELECT COUNT(*) AS n FROM products').get().n;
   if (count === 0) {
     const ins = db.prepare('INSERT INTO products (sku, name, keywords, price, stock) VALUES (?, ?, ?, ?, ?)');
-    ins.run('KL-ORI', 'Kek Lapis Original', 'original,ori,classic,biasa', 45, 30);
-    ins.run('KL-PRU', 'Kek Lapis Prune', 'prune,prun', 55, 20);
-    ins.run('KL-CHS', 'Kek Lapis Cheese', 'cheese,keju', 60, 15);
-    ins.run('KL-HOR', 'Kek Lapis Horlicks', 'horlicks,horlick', 58, 12);
-    ins.run('KL-MIL', 'Kek Lapis Milo', 'milo', 58, 0);
+    ins.run('KL-ORI', 'Kek Lapis Original', PRODUCT_ALIASES['KL-ORI'], 45, 30);
+    ins.run('KL-PRU', 'Kek Lapis Prune', PRODUCT_ALIASES['KL-PRU'], 55, 20);
+    ins.run('KL-CHS', 'Kek Lapis Cheese', PRODUCT_ALIASES['KL-CHS'], 60, 15);
+    ins.run('KL-HOR', 'Kek Lapis Horlicks', PRODUCT_ALIASES['KL-HOR'], 58, 12);
+    ins.run('KL-MIL', 'Kek Lapis Milo', PRODUCT_ALIASES['KL-MIL'], 58, 0);
+  }
+  // Existing shops get the Malay and Chinese names added to their keywords.
+  const get = db.prepare('SELECT keywords FROM products WHERE sku = ?');
+  const set = db.prepare('UPDATE products SET keywords = ? WHERE sku = ?');
+  for (const [sku, aliases] of Object.entries(PRODUCT_ALIASES)) {
+    const row = get.get(sku);
+    if (!row) continue;
+    const have = row.keywords.split(',').map((k) => k.trim()).filter(Boolean);
+    const merged = [...new Set([...have, ...aliases.split(',')])].join(',');
+    if (merged !== row.keywords) set.run(merged, sku);
   }
 }
+
+// Words customers use for each flavour, in English, Malay and Chinese.
+const PRODUCT_ALIASES = {
+  'KL-ORI': 'original,ori,classic,biasa,asli,原味,传统',
+  'KL-PRU': 'prune,prun,西梅',
+  'KL-CHS': 'cheese,keju,芝士,奶酪',
+  'KL-HOR': 'horlicks,horlick,好立克',
+  'KL-MIL': 'milo,美禄',
+};
 
 export function getSettings(db) {
   const rows = db.prepare('SELECT key, value FROM settings').all();

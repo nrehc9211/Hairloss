@@ -1,0 +1,49 @@
+{
+  "_note": "Demo FAQ for Mak Teh Kek Lapis (invented). The AI drafts answers ONLY from this file plus the prices and delivery settings in SmartDesk. Halal status is deliberately missing so the demo shows a question the FAQ cannot answer.",
+  "faq": [
+    {
+      "q": "Can you write Happy Birthday or a message on the cake or box? (tulis ucapan, mesej, kad)",
+      "a": "We include a free greeting card with your message inside the box. We cannot write on the cake itself, but a printed message sticker on the box lid is RM3.00 per box."
+    },
+    {
+      "q": "How long can kek lapis be kept? How to store it? (tahan berapa lama, simpan, peti sejuk)",
+      "a": "Kek lapis keeps 7 days at room temperature in an airtight container, 2 weeks in the fridge, and up to 3 months in the freezer. Let it reach room temperature before serving."
+    },
+    {
+      "q": "What is the size of one box? How many slices? (saiz kotak, berapa keping)",
+      "a": "Each box is one 7 x 7 inch kek lapis, about 600g, cut into around 12 slices."
+    },
+    {
+      "q": "What ingredients do you use? Allergens? Nuts? (bahan, alahan, kacang, telur)",
+      "a": "Our kek lapis is made with butter, eggs, flour, sugar and condensed milk. It contains egg, milk and wheat. Our kitchen also handles nuts, so all cakes may contain traces of nuts."
+    },
+    {
+      "q": "Do you have eggless or sugar-free kek lapis? (tanpa telur, kurang manis)",
+      "a": "All our kek lapis contain eggs, and we do not make sugar-free versions. We can bake a less sweet version for orders of 5 boxes or more with 5 days notice."
+    },
+    {
+      "q": "Do you take corporate, bulk or Hari Raya gift orders? (pesanan korporat, banyak, hamper)",
+      "a": "Yes. Orders above 20 boxes need 7 days notice, and custom company stickers are available. The owner will confirm the price and delivery date for bulk orders."
+    },
+    {
+      "q": "Do you have gift boxes or wrapping? (kotak hadiah, balut)",
+      "a": "A festive gift box with ribbon is RM5.00 per box."
+    },
+    {
+      "q": "Can I pick up the cake myself? Where is the shop? (ambil sendiri, kedai, lokasi)",
+      "a": "Self pickup is available in Shah Alam Section 7 by appointment, Tuesday to Sunday, 10am to 6pm. We will send the exact address after your order is confirmed."
+    },
+    {
+      "q": "How is the cake packed for courier delivery? Will it break? (bungkus, pecah)",
+      "a": "Each cake is vacuum sealed, boxed and wrapped in bubble wrap, so it travels safely by courier."
+    },
+    {
+      "q": "Can I pay cash on delivery or by card? (bayar tunai, COD, kad)",
+      "a": "We accept bank transfer only. Cash on delivery and card payments are not available."
+    },
+    {
+      "q": "Can I cancel or change my order? (batal, tukar pesanan)",
+      "a": "You can change or cancel for free before your invoice is approved. After payment, please message us and the owner will help."
+    }
+  ]
+}
