@@ -9,9 +9,15 @@
     "dev": "node --watch src/server.js",
     "test": "node --test --test-concurrency=1",
     "reset": "node scripts/reset.js",
-    "wa:check": "node scripts/wa-check.js"
+    "wa:check": "node scripts/wa-check.js",
+    "rag:build": "node scripts/rag-build.cjs",
+    "rag:ask": "node scripts/rag-ask.cjs",
+    "rag:report": "node scripts/rag-report.cjs",
+    "rag:retest": "node scripts/rag-retest.cjs"
   },
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "dependencies": {
     "pdf-lib": "^1.17.1"
   }

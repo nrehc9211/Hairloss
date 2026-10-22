@@ -1,0 +1,226 @@
+{
+  "_note": "Fictional demo catalogue for Dapur Lina Cakes. Replace with a real SME's catalogue when available.",
+  "business": {
+    "name": "Dapur Lina Cakes",
+    "currency": "RM",
+    "location": "Jalan Cheras, Taman Connaught, 56000 Kuala Lumpur",
+    "whatsapp": "Orders and questions by WhatsApp only",
+    "opening_hours": "Tuesday to Sunday, 9am to 7pm; closed Monday and on the first day of Hari Raya and Chinese New Year",
+    "order_lead_time": "Order before 6pm for next-day pickup or delivery; custom design cakes need 3 days; party packs need 2 days",
+    "pickup": "Self pickup at the shop during opening hours",
+    "delivery": "Delivery within 10 km of Taman Connaught, RM8 flat fee; free for orders above RM150; delivery slots 10am to 6pm",
+    "payment": "DuitNow QR or bank transfer; full payment before delivery for retail customers; cafes and offices on account pay monthly within 30 days",
+    "wholesale": "Cafes, offices and restaurants get wholesale prices with a minimum of RM100 per delivery",
+    "allergen_note": "Allergens (alahan): our kitchen also handles peanuts and tree nuts (kacang, 花生, 坚果), so all products may contain traces of nuts"
+  },
+  "items": [
+    {
+      "id": "P001",
+      "name": "Chocolate Fudge Cake",
+      "category": "Cakes",
+      "aliases": ["kek coklat", "chocolate cake", "choc cake", "巧克力蛋糕"],
+      "sizes": [
+        { "size": "6 inch (serves 8 to 10)", "price": 85 },
+        { "size": "8 inch (serves 14 to 16)", "price": 120 }
+      ],
+      "description": "Moist chocolate sponge with dark chocolate ganache",
+      "allergens": ["egg", "milk", "wheat"]
+    },
+    {
+      "id": "P002",
+      "name": "Pandan Gula Melaka Cake",
+      "category": "Cakes",
+      "aliases": ["kek pandan", "pandan cake", "班兰蛋糕"],
+      "sizes": [
+        { "size": "6 inch (serves 8 to 10)", "price": 78 },
+        { "size": "8 inch (serves 14 to 16)", "price": 110 }
+      ],
+      "description": "Pandan chiffon layered with gula melaka cream",
+      "allergens": ["egg", "milk", "wheat"]
+    },
+    {
+      "id": "P003",
+      "name": "Burnt Cheesecake",
+      "category": "Cakes",
+      "aliases": ["cheesecake", "basque cheesecake", "kek keju", "芝士蛋糕"],
+      "sizes": [
+        { "size": "6 inch (serves 8 to 10)", "price": 95 },
+        { "size": "8 inch (serves 14 to 16)", "price": 135 }
+      ],
+      "description": "Basque-style burnt cheesecake with a creamy centre",
+      "allergens": ["egg", "milk", "wheat"]
+    },
+    {
+      "id": "P004",
+      "name": "Red Velvet Cake",
+      "category": "Cakes",
+      "aliases": ["red velvet", "kek red velvet", "红丝绒蛋糕"],
+      "sizes": [
+        { "size": "6 inch (serves 8 to 10)", "price": 88 },
+        { "size": "8 inch (serves 14 to 16)", "price": 125 }
+      ],
+      "description": "Red velvet sponge with cream cheese frosting",
+      "allergens": ["egg", "milk", "wheat"]
+    },
+    {
+      "id": "P005",
+      "name": "Mango Mousse Cake",
+      "category": "Cakes",
+      "aliases": ["kek mangga", "mango cake", "芒果蛋糕"],
+      "sizes": [{ "size": "6 inch (serves 8 to 10)", "price": 90 }],
+      "description": "Light mango mousse on a vanilla sponge base",
+      "allergens": ["egg", "milk", "wheat"]
+    },
+    {
+      "id": "P006",
+      "name": "Musang King Durian Cake",
+      "category": "Cakes",
+      "aliases": ["kek durian", "durian cake", "榴莲蛋糕"],
+      "sizes": [{ "size": "6 inch (serves 8 to 10)", "price": 138 }],
+      "availability": "Seasonal: June to September only. Not available outside durian season.",
+      "allergens": ["egg", "milk", "wheat"]
+    },
+    {
+      "id": "P007",
+      "name": "Custom Birthday Cake",
+      "category": "Cakes",
+      "aliases": ["kek hari jadi", "birthday cake", "custom cake", "kek custom", "生日蛋糕"],
+      "sizes": [
+        { "size": "6 inch, simple design", "price": 130 },
+        { "size": "8 inch, simple design", "price": 180 }
+      ],
+      "description": "Choice of chocolate, vanilla or pandan sponge with a design based on your reference picture. Complex designs and fondant figurines are quoted separately by the owner.",
+      "lead_time": "3 days"
+    },
+    {
+      "id": "P010",
+      "name": "Kaya Bun",
+      "category": "Bread",
+      "aliases": ["roti kaya", "kaya bread", "咖椰包"],
+      "price": 2.5,
+      "unit": "per piece",
+      "wholesale_price": "RM2.00 per piece for cafes and offices",
+      "minimum_order": "10 pieces for delivery"
+    },
+    {
+      "id": "P011",
+      "name": "Wholemeal Loaf",
+      "category": "Bread",
+      "aliases": ["wholemeal", "roti wholemeal", "brown bread", "全麦面包"],
+      "price": 7.5,
+      "unit": "per loaf (12 slices)",
+      "wholesale_price": "RM6.50 per loaf for cafes and offices"
+    },
+    {
+      "id": "P012",
+      "name": "Butter Sugar Bun",
+      "category": "Bread",
+      "aliases": ["roti gula", "roti mentega", "butter bun", "牛油面包"],
+      "price": 2.2,
+      "unit": "per piece",
+      "wholesale_price": "RM1.80 per piece for cafes and offices"
+    },
+    {
+      "id": "P013",
+      "name": "Chicken Sausage Bun",
+      "category": "Bread",
+      "aliases": ["roti sosej", "sausage bun", "香肠面包"],
+      "price": 3.0,
+      "unit": "per piece",
+      "description": "Soft bun with a chicken sausage"
+    },
+    {
+      "id": "P014",
+      "name": "Pandan Kaya Loaf",
+      "category": "Bread",
+      "aliases": ["roti pandan", "pandan loaf", "班兰面包"],
+      "price": 9.0,
+      "unit": "per loaf"
+    },
+    {
+      "id": "P020",
+      "name": "Kuih Lapis",
+      "category": "Kuih",
+      "aliases": ["lapis", "layer kuih", "千层糕"],
+      "price": 15.0,
+      "unit": "box of 10 pieces"
+    },
+    {
+      "id": "P021",
+      "name": "Seri Muka",
+      "category": "Kuih",
+      "aliases": ["kuih seri muka", "pandan glutinous rice kuih", "斑斓糯米糕"],
+      "price": 18.0,
+      "unit": "box of 8 pieces"
+    },
+    {
+      "id": "P022",
+      "name": "Egg Tart",
+      "category": "Pastry",
+      "aliases": ["tart telur", "egg tarts", "蛋挞"],
+      "price": 3.5,
+      "unit": "per piece",
+      "box_price": "RM19.00 for a box of 6"
+    },
+    {
+      "id": "P023",
+      "name": "Curry Puff",
+      "category": "Pastry",
+      "aliases": ["karipap", "epok-epok", "咖喱角"],
+      "price": 2.8,
+      "unit": "per piece",
+      "description": "Potato and chicken curry filling, spicy level medium"
+    },
+    {
+      "id": "P030",
+      "name": "Mini Cupcakes",
+      "category": "Party",
+      "aliases": ["cupcake", "kek cawan", "杯子蛋糕"],
+      "price": 36.0,
+      "unit": "box of 12",
+      "description": "Assorted flavours: chocolate, vanilla and red velvet"
+    },
+    {
+      "id": "P031",
+      "name": "Cake Jar",
+      "category": "Party",
+      "aliases": ["kek balang", "cake in a jar", "jar cake"],
+      "price": 12.9,
+      "unit": "per jar",
+      "flavours": "Chocolate, red velvet or biscoff"
+    },
+    {
+      "id": "P032",
+      "name": "Kuih Party Pack",
+      "category": "Party",
+      "aliases": ["party pack", "pek parti", "kuih untuk majlis", "派对配套"],
+      "price": 95.0,
+      "unit": "50 pieces, assorted kuih and pastries",
+      "lead_time": "2 days"
+    },
+    {
+      "id": "A01",
+      "name": "Photo Topper",
+      "category": "Add-ons",
+      "aliases": ["gambar atas kek", "edible photo", "照片蛋糕"],
+      "price": 15.0,
+      "description": "Edible printed photo on top of any 6 or 8 inch cake; send the photo by WhatsApp"
+    },
+    {
+      "id": "A02",
+      "name": "Gift Box",
+      "category": "Add-ons",
+      "aliases": ["kotak hadiah", "gift packaging", "礼盒"],
+      "price": 5.0,
+      "description": "Premium box with ribbon for cakes up to 8 inch"
+    }
+  ],
+  "faq": [
+    { "q": "Can I add a name or message on the cake?", "a": "Yes, a short message of up to 30 characters is free on any cake." },
+    { "q": "Are candles included?", "a": "Yes, 5 small candles are included free with every cake. A number candle is RM3." },
+    { "q": "How long can the cake be kept?", "a": "Keep cakes refrigerated and finish within 3 days. Bread and kuih are best eaten on the same day." },
+    { "q": "Can I change or cancel my order?", "a": "Changes and cancellations are free until 6pm the day before. Custom cakes cannot be cancelled once decorating has started, which is 2 days before pickup." },
+    { "q": "Can I order for same-day delivery?", "a": "Same-day orders are not guaranteed. Message us before 10am and we will check what is available." },
+    { "q": "Do you accept cash on delivery?", "a": "No, payment is by DuitNow QR or bank transfer before delivery." }
+  ]
+}
