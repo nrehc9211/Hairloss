@@ -141,3 +141,23 @@ test('unanswered questions become hypotheses in the report', async () => {
   assert.match(report, /halal certification status/);
   assert.match(report, /\*\*How to test:\*\*/);
 });
+
+test('Claude credentials: own key first, then Replit AI Integrations', () => {
+  const { anthropicConfig } = require('../src/rag/llm.cjs');
+  const saved = { ...process.env };
+  try {
+    for (const k of ['ANTHROPIC_API_KEY', 'ANTHROPIC_BASE_URL', 'ANTHROPIC_MODEL',
+      'AI_INTEGRATIONS_ANTHROPIC_API_KEY', 'AI_INTEGRATIONS_ANTHROPIC_BASE_URL']) delete process.env[k];
+    assert.throws(() => anthropicConfig(), /No Claude credentials/);
+
+    process.env.AI_INTEGRATIONS_ANTHROPIC_API_KEY = 'replit-key';
+    process.env.AI_INTEGRATIONS_ANTHROPIC_BASE_URL = 'http://localhost:1106/anthropic';
+    assert.equal(anthropicConfig().provider, 'replit');
+    assert.equal(anthropicConfig().model, 'claude-sonnet-5');
+
+    process.env.ANTHROPIC_API_KEY = 'own-key';
+    assert.equal(anthropicConfig().provider, 'anthropic');
+  } finally {
+    process.env = saved;
+  }
+});
