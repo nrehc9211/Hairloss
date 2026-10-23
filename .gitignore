@@ -1,0 +1,6 @@
+# Never upload secrets, local data or installed packages
+.env
+data/
+node_modules/
+.venv/
+*.log

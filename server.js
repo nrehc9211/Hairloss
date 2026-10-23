@@ -1,6 +1,7 @@
 // Orbyte SmartDesk server - zero dependencies (Node >= 22.5).
 //   node server.js           start on http://localhost:3000
 //   node server.js --reset   wipe the database and start fresh
+import './src/env.js'; // must stay first: loads .env before anything reads settings
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -9,6 +10,7 @@ import * as svc from './src/service.js';
 import * as whatsapp from './src/whatsapp.js';
 import * as orbyte from './src/orbyte.js';
 import { engineName } from './src/ai.js';
+import * as rag from './src/rag.js';
 
 const PORT = Number(process.env.PORT || 3000);
 const db = openDb({ reset: process.argv.includes('--reset') });
@@ -48,7 +50,7 @@ route('GET', '/api/dashboard', () => {
   const one = sql => db.prepare(sql).get();
   return {
     settings: getSettings(db),
-    integrations: { whatsapp: whatsapp.isLive() ? 'live' : 'simulated', orbyte: orbyte.isLive() ? 'live' : 'mock', ai: engineName() },
+    integrations: { whatsapp: whatsapp.isLive() ? 'live' : 'simulated', orbyte: orbyte.isLive() ? 'live' : 'mock', ai: engineName(), faqDrafts: rag.isAvailable() ? 'on' : 'off' },
     openQuestions: one(`SELECT COUNT(*) n FROM escalations WHERE status = 'open'`).n,
     pendingInvoices: one(`SELECT COUNT(*) n, COALESCE(SUM(amount),0) amt FROM invoices WHERE status = 'pending'`),
     outstanding: one(`SELECT COUNT(*) n, COALESCE(SUM(amount),0) amt FROM invoices WHERE status = 'approved' AND payment_status != 'paid'`),
@@ -72,6 +74,19 @@ route('GET', '/api/escalations', ({ query }) => db.prepare(`
   SELECT e.*, c.phone, c.name FROM escalations e JOIN customers c ON c.id = e.customer_id
   WHERE e.status = ? ORDER BY e.created_at ${query.get('status') === 'resolved' ? 'DESC' : 'ASC'}`).all(query.get('status') || 'open'));
 route('POST', '/api/escalations/:id/resolve', ({ params }) => (svc.resolveEscalation(db, Number(params.id)), { ok: true }));
+
+// FAQ drafts (RAG): approve/edit a draft, or ask the AI to draft again
+route('POST', '/api/escalations/:id/send-draft', ({ params, body }) => svc.sendDraft(db, Number(params.id), { text: body.text }));
+route('POST', '/api/escalations/:id/redraft', ({ params }) => {
+  const e = db.prepare(`SELECT status FROM escalations WHERE id = ?`).get(Number(params.id));
+  if (!e) throw svc.httpError(404, 'Question not found');
+  if (e.status !== 'open') throw svc.httpError(409, 'This question is already resolved');
+  svc.startDraft(db, Number(params.id));
+  return { ok: true };
+});
+route('GET', '/api/rag/status', () => rag.status(db));
+route('GET', '/api/rag/report', async ({ query }) => ({ raw: await rag.report(db, { useAi: query.get('ai') === '1' }) }));
+route('POST', '/api/rag/retest', () => rag.retest(db));
 
 route('GET', '/api/customers', () => db.prepare(`
   SELECT c.*, (SELECT body FROM messages m WHERE m.customer_id = c.id ORDER BY id DESC LIMIT 1) AS last_message,
@@ -169,7 +184,7 @@ const server = http.createServer(async (req, res) => {
         body = raw ? JSON.parse(raw) : {};
       }
       const result = await r.handler({ params, query: url.searchParams, body });
-      return result?.raw !== undefined ? send(200, result.raw, 'text/plain') : send(200, result);
+      return result?.raw !== undefined ? send(200, result.raw, 'text/plain; charset=utf-8') : send(200, result);
     }
     if (req.method !== 'GET') return send(404, { error: 'Not found' });
     // static files; unknown paths fall back to the SPA
