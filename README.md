@@ -10,24 +10,24 @@
 
 | Field                  | Details                                     |
 | ---------------------- | ------------------------------------------- |
-| **Team Name**          | Hairloss                             |
-| **Team Domain**        | Domain 2         |
+| **Team Name**          | Hairloss                                    |
+| **Team Domain**        | Domain 2                                    |
 | **SDG Track (1–17)**   | SDG 8 — Decent Work and Economic Growth     | 
-                         | SDG 9 Innovation                            |
-                         | SDG 12 Less waste (paperless)               |
+|                        | SDG 9 Innovation                            |
+|                        | SDG 12 Less waste (paperless)               |
 | **Team Leader**        | Judah Teoh Em Yu                            |
 | **University**         | University Malaya                           |
 | **Number of Members**  | 5                                           |
 
 ## Links
 
-| Resource          | Link                                           |
-| ----------------- | ---------------------------------------------- |
-| GitHub Repository | https://github.com/nrehc9211/Smart-Desk        |
-| Live Demo         | https://orbyte-smartdesk.replit.app/           |
-| Orbyte Sandbox    | https://orbyte-xyz.alphareds.com/              |
-| Slide Deck        | https://canva.link/7zo3mywqf4o9idn             |
-| Demo Video        | https://example.com/demo-video                 |
+| Resource          | Link                                             |
+| ----------------- | ------------------------------------------------ |
+| GitHub Repository | https://github.com/nrehc9211/Smart-Desk          |
+| Live Demo         | https://orbyte-smartdesk.replit.app/             |
+| Orbyte Sandbox    | https://orbyte-xyz.alphareds.com/                |
+| Slide Deck        | https://canva.link/7zo3mywqf4o9idn               |
+| Demo Video        | https://youtu.be/J02ctPJ9VnU?si=n5iiHofS-ZHKVHCl |
 
 ---
 
@@ -239,7 +239,7 @@ SDG links: **8** (Decent Work & Economic Growth: less admin, more selling), **9*
 - **Secrets:** API keys are stored in Replit Secrets, never in the code. `src/env.js` loads `.env` locally, but real environment variables (Replit Secrets) always win.
 - **AI Integrations:** The Claude client (`src/rag/llm.cjs`) also supports Replit AI Integrations (`AI_INTEGRATIONS_ANTHROPIC_API_KEY`, `AI_INTEGRATIONS_ANTHROPIC_BASE_URL`).
 
-📄 Proof of use: [`submission/SDC2026_TeamName_Replit_POU.pdf`](submission/SDC2026_TeamName_Replit_POU.pdf)
+📄 Proof of use: [`submission/SDC2026_Hairloss_Replit_POU.pdf`](submission/SDC2026_Hairloss_Replit_POU.pdf)
 
 ---
 
@@ -260,13 +260,13 @@ SDG links: **8** (Decent Work & Economic Growth: less admin, more selling), **9*
 
 ## Team
  
-| Name              | Role                | GitHub                                               |
-| -----------       | ------------------- | ---------------------------------------------------- |
-| JUDAH TEOH EM YU  | Team Lead / Backend | [@JudahTeoh](https://github.com/JudahTeoh)           |
-| CHEW SIAN CHERN   | Frontend / Bankend  | [@nrehc9211](https://github.com/nrehc9211)           |
-| JANET SOO YU TING | Replit / Frontend   | [@Janet-lab3142](https://github.com/Janet-lab3142)   |
-| ONG SEN HUI       | Database            | [@ONGSENHUI-2026](https://github.com/ONGSENHUI-2026) |
-| JTEH SHIANG HAN   | Replit              | [@username](https://github.com/username)             |
+| Name              | Role                | GitHub                                                            |
+| -----------       | ------------------- | ------------------------------------------------------------------|
+| JUDAH TEOH EM YU  | Team Lead / Backend | [@JudahTeoh](https://github.com/JudahTeoh)                        |
+| CHEW SIAN CHERN   | Frontend / Bankend  | [@nrehc9211](https://github.com/nrehc9211)                        |
+| JANET SOO YU TING | Replit / Frontend   | [@Janet-lab3142](https://github.com/Janet-lab3142)                |
+| ONG SEN HUI       | Database            | [@ONGSENHUI-2026](https://github.com/ONGSENHUI-2026)              |
+| TEH SHIANG HAN   | Replit               | [@tehshianghan-24225861](https://github.com/tehshianghan-24225861)|
 
 ---
 
@@ -276,8 +276,8 @@ SDG links: **8** (Decent Work & Economic Growth: less admin, more selling), **9*
 - [/] Slide deck link added
 - [/] Demo video link added
 - [/] Replit used, with proof of use in `submission/`
-- [/] Preliminary submission completed (`SDC2026_TeamName_Preliminary.pdf`)
-- [/] Technology declaration completed (`SDC2026_TeamName_TechDeclaration.pdf`)
+- [/] Preliminary submission completed (`SDC2026_Hairloss_Preliminary.pdf`)
+- [/] Technology declaration completed (`SDC2026_Hairloss_TechDeclaration.pdf`)
 - [/] Submission files renamed with your team name (replace `Hairloss`)
 - [/] "How to Run" steps verified
 - [/] No API keys or secrets committed to the repository
